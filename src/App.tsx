@@ -398,13 +398,13 @@ function App() {
     return `${baseClass} ${darkMode ? 'dark' : ''}`;
   };
 
-  // 获取文字增强效果的类名
-  const getTextEnhanceClass = (): string => {
-    if (!configs['site.backgroundImage']) {
-      return '';
-    }
-    return `glass-text-enhance ${darkMode ? 'dark' : ''}`;
-  };
+  // 获取文字增强效果的类名（暂时注释掉，避免构建错误）
+  // const getTextEnhanceClass = (): string => {
+  //   if (!configs['site.backgroundImage']) {
+  //     return '';
+  //   }
+  //   return `glass-text-enhance ${darkMode ? 'dark' : ''}`;
+  // };
 
   // 同步HTML的class以保持与现有CSS兼容
   useEffect(() => {
