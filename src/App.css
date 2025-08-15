@@ -43,6 +43,39 @@
   -webkit-backdrop-filter: blur(5px);
 }
 
+/* 电脑端背景图片固定样式 */
+@media (min-width: 768px) {
+  .desktop-background-fixed {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* 可选：如果希望背景图片完全显示而不被裁剪，使用 contain */
+  .desktop-background-contain {
+    background-size: contain !important;
+  }
+
+  /* 可选：如果希望背景图片填充整个视口但保持比例，使用 cover */
+  .desktop-background-cover {
+    background-size: cover !important;
+  }
+}
+
+/* 移动端保持原有的背景样式 */
+@media (max-width: 767px) {
+  .mobile-background-responsive {
+    position: absolute !important;
+    background-size: cover !important;
+  }
+}
+
 /* 增加卡片在有背景图片时的可读性 */
 .dark .MuiPaper-root {
   border: 1px solid rgba(255, 255, 255, 0.1);

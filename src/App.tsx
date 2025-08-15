@@ -108,6 +108,7 @@ const DEFAULT_CONFIGS = {
   'site.customCss': '',
   'site.backgroundImage': '', // 背景图片URL
   'site.backgroundOpacity': '0.15', // 背景蒙版透明度
+  'site.backgroundMode': 'cover', // 背景图片显示模式: cover, contain, fixed
   'site.iconApi': 'https://www.faviconextractor.com/favicon/{domain}?larger=true', // 默认使用的API接口，带上 ?larger=true 参数可以获取最大尺寸的图标
 };
 
@@ -942,15 +943,32 @@ function App() {
           <>
             <Box
               sx={{
-                position: 'absolute',
+                // 根据背景模式决定定位方式
+                position: configs['site.backgroundMode'] === 'fixed'
+                  ? { xs: 'absolute', md: 'fixed' }
+                  : 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
+                // 固定模式在电脑端使用视口尺寸
+                width: configs['site.backgroundMode'] === 'fixed'
+                  ? { xs: '100%', md: '100vw' }
+                  : '100%',
+                height: configs['site.backgroundMode'] === 'fixed'
+                  ? { xs: '100%', md: '100vh' }
+                  : '100%',
                 backgroundImage: `url(${configs['site.backgroundImage']})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                // 根据配置选择背景尺寸模式
+                backgroundSize: configs['site.backgroundMode'] === 'contain'
+                  ? 'contain'
+                  : 'cover',
+                backgroundPosition: 'center center',
                 backgroundRepeat: 'no-repeat',
+                // 固定模式使用固定背景附着
+                backgroundAttachment: configs['site.backgroundMode'] === 'fixed'
+                  ? { xs: 'scroll', md: 'fixed' }
+                  : 'scroll',
                 zIndex: 0,
                 '&::before': {
                   content: '""',
@@ -1481,6 +1499,27 @@ function App() {
                     placeholder='https://example.com/background.jpg'
                     helperText='输入图片URL，留空则不使用背景图片'
                   />
+
+                  <TextField
+                    margin='dense'
+                    id='site-background-mode'
+                    name='site.backgroundMode'
+                    label='背景图片显示模式'
+                    select
+                    fullWidth
+                    variant='outlined'
+                    value={tempConfigs['site.backgroundMode'] || 'cover'}
+                    onChange={handleConfigInputChange}
+                    helperText='选择背景图片的显示方式'
+                    sx={{ mb: 2 }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                  >
+                    <option value='cover'>覆盖模式 (推荐) - 图片覆盖整个背景，可能被裁剪</option>
+                    <option value='contain'>包含模式 - 完整显示图片，可能有空白区域</option>
+                    <option value='fixed'>固定模式 (电脑端) - 背景固定，内容滚动时不变化</option>
+                  </TextField>
 
                   <Box sx={{ mt: 2, mb: 1 }}>
                     <Typography
