@@ -24,7 +24,7 @@
     "vars": {
         "AUTH_ENABLED": "true",
         "AUTH_USERNAME": "zhizun",
-        "AUTH_PASSWORD": "zhizun",
-        "AUTH_SECRET": "944986"
+        "AUTH_PASSWORD": "zun142857",
+        "AUTH_SECRET": "zhizun944986"
     }
 }

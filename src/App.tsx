@@ -375,6 +375,37 @@ function App() {
     );
   };
 
+  // 获取毛玻璃效果的类名
+  const getGlassEffectClass = (type: 'group' | 'site' | 'dialog' | 'general' = 'general'): string => {
+    // 只有在设置了背景图片时才应用毛玻璃效果
+    if (!configs['site.backgroundImage']) {
+      return '';
+    }
+
+    const baseClass = (() => {
+      switch (type) {
+        case 'group':
+          return 'group-card-glass';
+        case 'site':
+          return 'site-card-glass';
+        case 'dialog':
+          return 'dialog-glass';
+        default:
+          return 'glass-effect';
+      }
+    })();
+
+    return `${baseClass} ${darkMode ? 'dark' : ''}`;
+  };
+
+  // 获取文字增强效果的类名
+  const getTextEnhanceClass = (): string => {
+    if (!configs['site.backgroundImage']) {
+      return '';
+    }
+    return `glass-text-enhance ${darkMode ? 'dark' : ''}`;
+  };
+
   // 同步HTML的class以保持与现有CSS兼容
   useEffect(() => {
     if (darkMode) {
@@ -823,7 +854,13 @@ function App() {
           bgcolor: 'background.default',
         }}
       >
-        <LoginForm onLogin={handleLogin} loading={loginLoading} error={loginError} />
+        <LoginForm
+          onLogin={handleLogin}
+          loading={loginLoading}
+          error={loginError}
+          configs={configs}
+          darkMode={darkMode}
+        />
       </Box>
     );
   };
@@ -1205,6 +1242,7 @@ function App() {
                       onUpdateGroup={handleGroupUpdate}
                       onDeleteGroup={handleGroupDelete}
                       configs={configs}
+                      darkMode={darkMode}
                     />
                   ))}
                 </Stack>
@@ -1219,6 +1257,7 @@ function App() {
             maxWidth='md'
             fullWidth
             PaperProps={{
+              className: getGlassEffectClass('dialog'),
               sx: {
                 m: { xs: 2, sm: 3, md: 4 },
                 width: { xs: 'calc(100% - 32px)', sm: '80%', md: '70%', lg: '60%' },
@@ -1273,6 +1312,7 @@ function App() {
             maxWidth='md'
             fullWidth
             PaperProps={{
+              className: getGlassEffectClass('dialog'),
               sx: {
                 m: { xs: 2, sm: 'auto' },
                 width: { xs: 'calc(100% - 32px)', sm: 'auto' },
@@ -1416,6 +1456,7 @@ function App() {
             maxWidth='sm'
             fullWidth
             PaperProps={{
+              className: getGlassEffectClass('dialog'),
               sx: {
                 m: { xs: 2, sm: 3, md: 4 },
                 width: { xs: 'calc(100% - 32px)', sm: '80%', md: '70%', lg: '60%' },
@@ -1583,6 +1624,7 @@ function App() {
             maxWidth='sm'
             fullWidth
             PaperProps={{
+              className: getGlassEffectClass('dialog'),
               sx: {
                 m: { xs: 2, sm: 'auto' },
                 width: { xs: 'calc(100% - 32px)', sm: 'auto' },

@@ -25,6 +25,8 @@ interface SiteCardProps {
   isEditMode?: boolean;
   index?: number;
   iconApi?: string; // 添加iconApi属性
+  configs?: Record<string, string>; // 传入配置
+  darkMode?: boolean; // 传入主题模式
 }
 
 // 使用memo包装组件以减少不必要的重渲染
@@ -35,6 +37,8 @@ const SiteCard = memo(function SiteCard({
   isEditMode = false,
   index = 0,
   iconApi, // 添加iconApi参数
+  configs,
+  darkMode,
 }: SiteCardProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [iconError, setIconError] = useState(!site.icon);
@@ -62,6 +66,23 @@ const SiteCard = memo(function SiteCard({
     e.stopPropagation(); // 阻止卡片点击事件
     e.preventDefault(); // 防止默认行为
     setShowSettings(true);
+  };
+
+  // 获取毛玻璃效果的类名
+  const getGlassEffectClass = (): string => {
+    // 只有在设置了背景图片时才应用毛玻璃效果
+    if (!configs?.['site.backgroundImage']) {
+      return '';
+    }
+    return `site-card-glass ${darkMode ? 'dark' : ''}`;
+  };
+
+  // 获取文字增强效果的类名
+  const getTextEnhanceClass = (): string => {
+    if (!configs?.['site.backgroundImage']) {
+      return '';
+    }
+    return `glass-text-enhance ${darkMode ? 'dark' : ''}`;
   };
 
   // 处理关闭设置
@@ -101,12 +122,13 @@ const SiteCard = memo(function SiteCard({
       }}
     >
       <Card
+        className={getGlassEffectClass()}
         sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           borderRadius: 3,
-          transition: 'box-shadow 0.3s ease-in-out',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           border: '1px solid',
           borderColor: 'divider',
           boxShadow: isDragging ? 8 : 2,
@@ -116,9 +138,12 @@ const SiteCard = memo(function SiteCard({
               }
             : {},
           overflow: 'hidden',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? 'rgba(33, 33, 33, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(5px)',
+          // 如果没有毛玻璃效果，使用原有的背景样式
+          ...(!getGlassEffectClass() && {
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(33, 33, 33, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(5px)',
+          }),
         }}
       >
         {isEditMode ? (
@@ -187,6 +212,7 @@ const SiteCard = memo(function SiteCard({
                 variant='subtitle1'
                 fontWeight='medium'
                 noWrap
+                className={getTextEnhanceClass()}
                 sx={{
                   fontSize: { xs: '0.875rem', sm: '1rem' },
                 }}
@@ -199,6 +225,7 @@ const SiteCard = memo(function SiteCard({
             <Typography
               variant='body2'
               color='text.secondary'
+              className={getTextEnhanceClass()}
               sx={{
                 display: '-webkit-box',
                 WebkitLineClamp: 2,

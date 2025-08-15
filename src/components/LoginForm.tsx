@@ -16,9 +16,11 @@ interface LoginFormProps {
   onLogin: (username: string, password: string, rememberMe: boolean) => void;
   loading?: boolean;
   error?: string | null;
+  configs?: Record<string, string>; // 传入配置
+  darkMode?: boolean; // 传入主题模式
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading = false, error = null }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading = false, error = null, configs, darkMode }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -26,6 +28,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading = false, error =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(username, password, rememberMe);
+  };
+
+  // 获取毛玻璃效果的类名
+  const getGlassEffectClass = (): string => {
+    // 只有在设置了背景图片时才应用毛玻璃效果
+    if (!configs?.['site.backgroundImage']) {
+      return '';
+    }
+    return `dialog-glass ${darkMode ? 'dark' : ''}`;
   };
 
   return (
@@ -41,18 +52,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading = false, error =
     >
       <Paper
         elevation={3}
+        className={getGlassEffectClass()}
         sx={{
           p: { xs: 3, sm: 4 },
           borderRadius: 2,
           width: '100%',
           maxWidth: { xs: '90%', sm: 400 },
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? 'rgba(33, 33, 33, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: (theme) =>
-            theme.palette.mode === 'dark'
-              ? '0 8px 32px rgba(0, 0, 0, 0.3)'
-              : '0 8px 32px rgba(0, 0, 0, 0.1)',
+          // 如果没有毛玻璃效果，使用原有的背景样式
+          ...(!getGlassEffectClass() && {
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(33, 33, 33, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+                : '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }),
         }}
       >
         <Box

@@ -51,6 +51,7 @@ interface GroupCardProps {
   onUpdateGroup?: (group: Group) => void; // 更新分组的回调函数
   onDeleteGroup?: (groupId: number) => void; // 删除分组的回调函数
   configs?: Record<string, string>; // 传入配置
+  darkMode?: boolean; // 传入主题模式
 }
 
 const GroupCard: React.FC<GroupCardProps> = ({
@@ -65,6 +66,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
   onUpdateGroup,
   onDeleteGroup,
   configs,
+  darkMode,
 }) => {
   // 添加本地状态来管理站点排序
   const [sites, setSites] = useState<Site[]>(group.sites);
@@ -89,6 +91,23 @@ const GroupCard: React.FC<GroupCardProps> = ({
   // 处理折叠切换
   const handleToggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
+  };
+
+  // 获取毛玻璃效果的类名
+  const getGlassEffectClass = (): string => {
+    // 只有在设置了背景图片时才应用毛玻璃效果
+    if (!configs?.['site.backgroundImage']) {
+      return '';
+    }
+    return `group-card-glass ${darkMode ? 'dark' : ''}`;
+  };
+
+  // 获取文字增强效果的类名
+  const getTextEnhanceClass = (): string => {
+    if (!configs?.['site.backgroundImage']) {
+      return '';
+    }
+    return `glass-text-enhance ${darkMode ? 'dark' : ''}`;
   };
 
   // 配置传感器，支持鼠标、触摸和键盘操作
@@ -204,6 +223,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
                       isEditMode={true}
                       index={idx}
                       iconApi={configs?.['site.iconApi']} // 传入iconApi配置
+                      configs={configs}
+                      darkMode={darkMode}
                     />
                   </Box>
                 ))}
@@ -244,6 +265,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
               onDelete={onDelete}
               isEditMode={false}
               iconApi={configs?.['site.iconApi']} // 传入iconApi配置
+              configs={configs}
+              darkMode={darkMode}
             />
           </Box>
         ))}
@@ -279,6 +302,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
   return (
     <Paper
       elevation={sortMode === 'None' ? 2 : 3}
+      className={getGlassEffectClass()}
       sx={{
         borderRadius: 4,
         p: { xs: 2, sm: 3 },
@@ -289,9 +313,21 @@ const GroupCard: React.FC<GroupCardProps> = ({
           borderColor: 'divider',
           transform: sortMode === 'None' ? 'scale(1.01)' : 'none',
         },
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(33, 33, 33, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(5px)',
+        // 如果没有毛玻璃效果，使用原有的背景样式
+        ...(!getGlassEffectClass() && {
+          backgroundColor: (theme) =>
+            theme.palette.mode === 'dark' ? 'rgba(33, 33, 33, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(5px)',
+        }),
+        // 如果有毛玻璃效果，调整悬停样式
+        ...(getGlassEffectClass() && {
+          '&:hover': {
+            transform: sortMode === 'None' ? 'translateY(-2px)' : 'none',
+            boxShadow: darkMode
+              ? '0 12px 40px rgba(0, 0, 0, 0.5)'
+              : '0 12px 40px rgba(0, 0, 0, 0.15)',
+          },
+        }),
       }}
     >
       <Box
@@ -331,10 +367,17 @@ const GroupCard: React.FC<GroupCardProps> = ({
             component='h2'
             fontWeight='600'
             color='text.primary'
+            className={getTextEnhanceClass()}
             sx={{ mb: { xs: 1, sm: 0 } }}
           >
             {group.name}
-            <Typography component='span' variant='body2' color='text.secondary' sx={{ ml: 1 }}>
+            <Typography
+              component='span'
+              variant='body2'
+              color='text.secondary'
+              className={getTextEnhanceClass()}
+              sx={{ ml: 1 }}
+            >
               ({group.sites.length})
             </Typography>
           </Typography>
