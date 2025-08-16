@@ -70,8 +70,8 @@ const SiteCard = memo(function SiteCard({
 
   // 获取毛玻璃效果的类名
   const getGlassEffectClass = (): string => {
-    // 只有在设置了背景图片时才应用毛玻璃效果
-    if (!configs?.['site.backgroundImage']) {
+    // 检查是否启用毛玻璃效果且设置了背景图片
+    if (!configs?.['site.backgroundImage'] || configs?.['glass.enabled'] !== 'true') {
       return '';
     }
     return `site-card-glass ${darkMode ? 'dark' : ''}`;

@@ -112,6 +112,13 @@ const DEFAULT_CONFIGS = {
   'site.backgroundOpacity': '0.15', // 背景蒙版透明度
   'site.backgroundMode': 'cover', // 背景图片显示模式: cover, contain, fixed
   'site.iconApi': 'https://www.faviconextractor.com/favicon/{domain}?larger=true', // 默认使用的API接口，带上 ?larger=true 参数可以获取最大尺寸的图标
+
+  // 毛玻璃效果设置
+  'glass.enabled': 'true', // 是否启用毛玻璃效果
+  'glass.blur': '10', // 模糊程度 (px)
+  'glass.opacity': '0.1', // 毛玻璃背景透明度
+  'glass.border': 'true', // 是否显示边框
+  'glass.borderOpacity': '0.2', // 边框透明度
 };
 
 function App() {
@@ -454,10 +461,10 @@ function App() {
     setSelectedGroupFilter(groupId);
   };
 
-  // 获取毛玻璃效果的类名
+  // 获取毛玻璃效果的类名和样式
   const getGlassEffectClass = (type: 'group' | 'site' | 'dialog' | 'general' = 'general'): string => {
-    // 只有在设置了背景图片时才应用毛玻璃效果
-    if (!configs['site.backgroundImage']) {
+    // 检查是否启用毛玻璃效果且设置了背景图片
+    if (!configs['site.backgroundImage'] || configs['glass.enabled'] !== 'true') {
       return '';
     }
 
@@ -477,6 +484,8 @@ function App() {
     return `${baseClass} ${darkMode ? 'dark' : ''}`;
   };
 
+
+
   // 获取文字增强效果的类名（暂时注释掉，避免构建错误）
   // const getTextEnhanceClass = (): string => {
   //   if (!configs['site.backgroundImage']) {
@@ -493,6 +502,21 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+
+  // 更新CSS变量
+  const updateCSSVariables = () => {
+    const root = document.documentElement;
+
+    // 毛玻璃效果变量
+    root.style.setProperty('--glass-blur', `${configs['glass.blur'] || '10'}px`);
+    root.style.setProperty('--glass-opacity', configs['glass.opacity'] || '0.1');
+    root.style.setProperty('--glass-border-opacity', configs['glass.borderOpacity'] || '0.2');
+  };
+
+  // 当配置变化时更新CSS变量
+  useEffect(() => {
+    updateCSSVariables();
+  }, [configs]);
 
   // 处理错误的函数
   const handleError = (errorMessage: string) => {
@@ -1155,20 +1179,20 @@ function App() {
                   size="small"
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      backgroundColor: configs['site.backgroundImage']
+                      backgroundColor: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                         ? 'rgba(255, 255, 255, 0.1)'
                         : 'background.paper',
-                      backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
-                      border: configs['site.backgroundImage']
+                      backdropFilter: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true') ? 'blur(10px)' : 'none',
+                      border: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                         ? '1px solid rgba(255, 255, 255, 0.2)'
                         : undefined,
                       '&:hover': {
-                        backgroundColor: configs['site.backgroundImage']
+                        backgroundColor: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? 'rgba(255, 255, 255, 0.15)'
                           : undefined,
                       },
                       '&.Mui-focused': {
-                        backgroundColor: configs['site.backgroundImage']
+                        backgroundColor: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? 'rgba(255, 255, 255, 0.2)'
                           : undefined,
                       }
@@ -1215,10 +1239,10 @@ function App() {
                     sx={{
                       minWidth: 'auto',
                       fontSize: '0.75rem',
-                      backgroundColor: selectedGroupFilter === null && configs['site.backgroundImage']
+                      backgroundColor: selectedGroupFilter === null && (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                         ? 'rgba(25, 118, 210, 0.8)'
                         : undefined,
-                      backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                      backdropFilter: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true') ? 'blur(10px)' : 'none',
                     }}
                   >
                     全部
@@ -1232,10 +1256,10 @@ function App() {
                       sx={{
                         minWidth: 'auto',
                         fontSize: '0.75rem',
-                        backgroundColor: selectedGroupFilter === group.id && configs['site.backgroundImage']
+                        backgroundColor: selectedGroupFilter === group.id && (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? 'rgba(25, 118, 210, 0.8)'
                           : undefined,
-                        backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                        backdropFilter: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true') ? 'blur(10px)' : 'none',
                       }}
                     >
                       {group.name}
@@ -1419,11 +1443,11 @@ function App() {
                     <Paper
                       sx={{
                         p: 2,
-                        backgroundColor: configs['site.backgroundImage']
+                        backgroundColor: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? 'rgba(255, 255, 255, 0.1)'
                           : 'background.paper',
-                        backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
-                        border: configs['site.backgroundImage']
+                        backdropFilter: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true') ? 'blur(10px)' : 'none',
+                        border: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? '1px solid rgba(255, 255, 255, 0.2)'
                           : undefined,
                       }}
@@ -1445,11 +1469,11 @@ function App() {
                       sx={{
                         p: 4,
                         textAlign: 'center',
-                        backgroundColor: configs['site.backgroundImage']
+                        backgroundColor: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? 'rgba(255, 255, 255, 0.1)'
                           : 'background.paper',
-                        backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
-                        border: configs['site.backgroundImage']
+                        backdropFilter: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true') ? 'blur(10px)' : 'none',
+                        border: (configs['site.backgroundImage'] && configs['glass.enabled'] === 'true')
                           ? '1px solid rgba(255, 255, 255, 0.2)'
                           : undefined,
                       }}
@@ -1839,6 +1863,145 @@ function App() {
                     </Typography>
                   </Box>
                 </Box>
+
+                {/* 毛玻璃效果设置 */}
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant='subtitle1' gutterBottom>
+                    毛玻璃效果设置
+                  </Typography>
+
+                  {!tempConfigs['site.backgroundImage'] && (
+                    <Box sx={{ mb: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
+                      <Typography variant='body2' color='warning.dark'>
+                        💡 提示：毛玻璃效果需要先设置背景图片才能生效
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Typography variant='body2' sx={{ mr: 2 }}>
+                      启用毛玻璃效果
+                    </Typography>
+                    <Button
+                      size="small"
+                      variant={tempConfigs['glass.enabled'] === 'true' ? "contained" : "outlined"}
+                      onClick={() => {
+                        setTempConfigs({
+                          ...tempConfigs,
+                          'glass.enabled': tempConfigs['glass.enabled'] === 'true' ? 'false' : 'true',
+                        });
+                      }}
+                      sx={{ minWidth: 'auto' }}
+                      disabled={!tempConfigs['site.backgroundImage']}
+                    >
+                      {tempConfigs['glass.enabled'] === 'true' ? '已启用' : '已禁用'}
+                    </Button>
+                  </Box>
+
+                  {tempConfigs['glass.enabled'] === 'true' && (
+                    <>
+                      <Box sx={{ mt: 2, mb: 1 }}>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          id='glass-blur-slider'
+                          gutterBottom
+                        >
+                          模糊程度: {tempConfigs['glass.blur']}px
+                        </Typography>
+                        <Slider
+                          aria-labelledby='glass-blur-slider'
+                          name='glass.blur'
+                          min={0}
+                          max={30}
+                          step={1}
+                          valueLabelDisplay='auto'
+                          value={Number(tempConfigs['glass.blur'])}
+                          onChange={(_, value) => {
+                            setTempConfigs({
+                              ...tempConfigs,
+                              'glass.blur': String(value),
+                            });
+                          }}
+                        />
+                      </Box>
+
+                      <Box sx={{ mt: 2, mb: 1 }}>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          id='glass-opacity-slider'
+                          gutterBottom
+                        >
+                          背景透明度: {Number(tempConfigs['glass.opacity']).toFixed(2)}
+                        </Typography>
+                        <Slider
+                          aria-labelledby='glass-opacity-slider'
+                          name='glass.opacity'
+                          min={0}
+                          max={0.5}
+                          step={0.01}
+                          valueLabelDisplay='auto'
+                          value={Number(tempConfigs['glass.opacity'])}
+                          onChange={(_, value) => {
+                            setTempConfigs({
+                              ...tempConfigs,
+                              'glass.opacity': String(value),
+                            });
+                          }}
+                        />
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Typography variant='body2' sx={{ mr: 2 }}>
+                          显示边框
+                        </Typography>
+                        <Button
+                          size="small"
+                          variant={tempConfigs['glass.border'] === 'true' ? "contained" : "outlined"}
+                          onClick={() => {
+                            setTempConfigs({
+                              ...tempConfigs,
+                              'glass.border': tempConfigs['glass.border'] === 'true' ? 'false' : 'true',
+                            });
+                          }}
+                          sx={{ minWidth: 'auto' }}
+                        >
+                          {tempConfigs['glass.border'] === 'true' ? '显示' : '隐藏'}
+                        </Button>
+                      </Box>
+
+                      {tempConfigs['glass.border'] === 'true' && (
+                        <Box sx={{ mt: 2, mb: 1 }}>
+                          <Typography
+                            variant='body2'
+                            color='text.secondary'
+                            id='glass-border-opacity-slider'
+                            gutterBottom
+                          >
+                            边框透明度: {Number(tempConfigs['glass.borderOpacity']).toFixed(2)}
+                          </Typography>
+                          <Slider
+                            aria-labelledby='glass-border-opacity-slider'
+                            name='glass.borderOpacity'
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            valueLabelDisplay='auto'
+                            value={Number(tempConfigs['glass.borderOpacity'])}
+                            onChange={(_, value) => {
+                              setTempConfigs({
+                                ...tempConfigs,
+                                'glass.borderOpacity': String(value),
+                              });
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </>
+                  )}
+                </Box>
+
                 <TextField
                   margin='dense'
                   id='site-custom-css'
@@ -1946,7 +2109,7 @@ function App() {
           >
             <Paper
               component='a'
-              href='https://github.com/zqq-nuli/Navihive'
+              href='https://github.com/honestman9527/Cloudflare-Navihive'
               target='_blank'
               rel='noopener noreferrer'
               elevation={2}

@@ -1,3 +1,106 @@
+/* 美化滚动条 - 适应亮暗主题 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* 暗色主题滚动条 */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* 毛玻璃效果下的滚动条 */
+.glass-effect ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.glass-effect.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.glass-effect.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* 对话框内滚动条优化 */
+.MuiDialog-paper ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.MuiDialog-paper ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.MuiDialog-paper ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.dark .MuiDialog-paper ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark .MuiDialog-paper ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 文本框滚动条 */
+.MuiTextField-root textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+.MuiTextField-root textarea::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.MuiTextField-root textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark .MuiTextField-root textarea::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .MuiTextField-root textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .duration-0 {
   --tw-duration: 0ms;
   transition-duration: 0ms;
@@ -76,77 +179,86 @@
   }
 }
 
+/* CSS变量定义 */
+:root {
+  --glass-blur: 10px;
+  --glass-opacity: 0.1;
+  --glass-border-opacity: 0.2;
+}
+
 /* 毛玻璃效果样式 */
 .glass-effect {
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  background: rgba(255, 255, 255, var(--glass-opacity)) !important;
+  border: 1px solid rgba(255, 255, 255, var(--glass-border-opacity)) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease-in-out !important;
 }
 
 .glass-effect.dark {
-  background: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, calc(var(--glass-opacity) * 2)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 0.5)) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* 分组卡片毛玻璃效果 */
 .group-card-glass {
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(180%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(180%);
+  background: rgba(255, 255, 255, calc(var(--glass-opacity) * 0.8)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 0.75)) !important;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease-in-out !important;
 }
 
 .group-card-glass.dark {
-  background: rgba(0, 0, 0, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(0, 0, 0, calc(var(--glass-opacity) * 1.5)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 0.4)) !important;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* 网站卡片毛玻璃效果 */
 .site-card-glass {
-  backdrop-filter: blur(8px) saturate(160%);
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(calc(var(--glass-blur) - 2px)) saturate(160%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 2px)) saturate(160%);
+  background: rgba(255, 255, 255, calc(var(--glass-opacity) * 1.2)) !important;
+  border: 1px solid rgba(255, 255, 255, var(--glass-border-opacity)) !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .site-card-glass.dark {
-  background: rgba(0, 0, 0, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(0, 0, 0, calc(var(--glass-opacity) * 2.5)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 0.6)) !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3) !important;
 }
 
 .site-card-glass:hover {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, calc(var(--glass-opacity) * 1.8)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 1.5)) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
   transform: translateY(-2px);
 }
 
 .site-card-glass.dark:hover {
-  background: rgba(0, 0, 0, 0.35) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background: rgba(0, 0, 0, calc(var(--glass-opacity) * 3.5)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 0.9)) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* 对话框毛玻璃效果 */
 .dialog-glass {
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(180%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(180%);
+  background: rgba(255, 255, 255, calc(var(--glass-opacity) * 9)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 1.5)) !important;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1) !important;
 }
 
 .dialog-glass.dark {
-  background: rgba(30, 30, 30, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 30, 30, calc(var(--glass-opacity) * 9)) !important;
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-border-opacity) * 0.5)) !important;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
 }
 
