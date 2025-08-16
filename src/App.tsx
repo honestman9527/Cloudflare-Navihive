@@ -65,6 +65,8 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 // 根据环境选择使用真实API还是模拟API
 const isDevEnvironment = import.meta.env.DEV;
@@ -207,6 +209,10 @@ function App() {
   const [importResultOpen, setImportResultOpen] = useState(false);
   const [importResultMessage, setImportResultMessage] = useState('');
 
+  // 搜索功能状态
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<number | null>(null);
+
   // 菜单打开关闭
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -334,6 +340,29 @@ function App() {
     setCurrentSortingGroupId(null);
   }, []);
 
+  // 添加键盘快捷键支持
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl/Cmd + K 快速搜索
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        const searchInput = document.querySelector('input[placeholder="搜索网站..."]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+      // Escape 清除搜索
+      if (event.key === 'Escape' && (searchQuery || selectedGroupFilter !== null)) {
+        handleClearSearch();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [searchQuery, selectedGroupFilter]);
+
   // 设置文档标题
   useEffect(() => {
     document.title = configs['site.title'] || '导航站';
@@ -373,6 +402,56 @@ function App() {
         // 过滤content属性中的不安全内容
         .replace(/content\s*:\s*(['"]?).*?url\s*\(\s*(['"]?)javascript:/gi, 'content: $1')
     );
+  };
+
+  // 搜索和过滤逻辑
+  const filterSites = (sites: Site[], query: string): Site[] => {
+    if (!query.trim()) return sites;
+
+    const searchTerm = query.toLowerCase().trim();
+    return sites.filter(site =>
+      site.name.toLowerCase().includes(searchTerm) ||
+      site.url.toLowerCase().includes(searchTerm) ||
+      (site.description && site.description.toLowerCase().includes(searchTerm)) ||
+      (site.notes && site.notes.toLowerCase().includes(searchTerm))
+    );
+  };
+
+  // 获取过滤后的分组数据
+  const getFilteredGroups = useMemo(() => {
+    let filteredGroups = [...groups];
+
+    // 如果有分组过滤器，只显示选中的分组
+    if (selectedGroupFilter !== null) {
+      filteredGroups = filteredGroups.filter(group => group.id === selectedGroupFilter);
+    }
+
+    // 如果有搜索查询，过滤站点
+    if (searchQuery.trim()) {
+      filteredGroups = filteredGroups.map(group => ({
+        ...group,
+        sites: filterSites(group.sites, searchQuery)
+      })).filter(group => group.sites.length > 0); // 只显示有匹配站点的分组
+    }
+
+    return filteredGroups;
+  }, [groups, searchQuery, selectedGroupFilter]);
+
+  // 搜索处理函数
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+  };
+
+  // 清除搜索
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSelectedGroupFilter(null);
+  };
+
+  // 分组过滤处理
+  const handleGroupFilter = (groupId: number | null) => {
+    setSelectedGroupFilter(groupId);
   };
 
   // 获取毛玻璃效果的类名
@@ -1046,18 +1125,125 @@ function App() {
               gap: { xs: 2, sm: 0 },
             }}
           >
-            <Typography
-              variant='h3'
-              component='h1'
-              fontWeight='bold'
-              color='text.primary'
-              sx={{
-                fontSize: { xs: '1.75rem', sm: '2.125rem', md: '3rem' },
-                textAlign: { xs: 'center', sm: 'left' },
-              }}
-            >
-              {configs['site.name']}
-            </Typography>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant='h3'
+                component='h1'
+                fontWeight='bold'
+                color='text.primary'
+                sx={{
+                  fontSize: { xs: '1.75rem', sm: '2.125rem', md: '3rem' },
+                  textAlign: { xs: 'center', sm: 'left' },
+                  mb: { xs: 2, sm: 0 },
+                }}
+              >
+                {configs['site.name']}
+              </Typography>
+
+              {/* 搜索栏 */}
+              <Box sx={{
+                mt: { xs: 2, sm: 3 },
+                maxWidth: { xs: '100%', sm: '400px', md: '500px' },
+                mx: { xs: 'auto', sm: 0 }
+              }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="搜索网站... (Ctrl+K)"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: configs['site.backgroundImage']
+                        ? 'rgba(255, 255, 255, 0.1)'
+                        : 'background.paper',
+                      backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                      border: configs['site.backgroundImage']
+                        ? '1px solid rgba(255, 255, 255, 0.2)'
+                        : undefined,
+                      '&:hover': {
+                        backgroundColor: configs['site.backgroundImage']
+                          ? 'rgba(255, 255, 255, 0.15)'
+                          : undefined,
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: configs['site.backgroundImage']
+                          ? 'rgba(255, 255, 255, 0.2)'
+                          : undefined,
+                      }
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: searchQuery && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={handleClearSearch}
+                          edge="end"
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+
+              {/* 分组过滤器 */}
+              {(searchQuery || selectedGroupFilter !== null) && (
+                <Box sx={{
+                  mt: 2,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  alignItems: 'center',
+                  justifyContent: { xs: 'center', sm: 'flex-start' }
+                }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                    过滤：
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant={selectedGroupFilter === null ? "contained" : "outlined"}
+                    onClick={() => handleGroupFilter(null)}
+                    sx={{
+                      minWidth: 'auto',
+                      fontSize: '0.75rem',
+                      backgroundColor: selectedGroupFilter === null && configs['site.backgroundImage']
+                        ? 'rgba(25, 118, 210, 0.8)'
+                        : undefined,
+                      backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                    }}
+                  >
+                    全部
+                  </Button>
+                  {groups.map((group) => (
+                    <Button
+                      key={group.id}
+                      size="small"
+                      variant={selectedGroupFilter === group.id ? "contained" : "outlined"}
+                      onClick={() => handleGroupFilter(group.id)}
+                      sx={{
+                        minWidth: 'auto',
+                        fontSize: '0.75rem',
+                        backgroundColor: selectedGroupFilter === group.id && configs['site.backgroundImage']
+                          ? 'rgba(25, 118, 210, 0.8)'
+                          : undefined,
+                        backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                      }}
+                    >
+                      {group.name}
+                    </Button>
+                  ))}
+                </Box>
+              )}
+            </Box>
             <Stack
               direction={{ xs: 'row', sm: 'row' }}
               spacing={{ xs: 1, sm: 2 }}
@@ -1228,23 +1414,85 @@ function App() {
                 </DndContext>
               ) : (
                 <Stack spacing={5}>
-                  {groups.map((group) => (
-                    <GroupCard
-                      key={`group-${group.id}`}
-                      group={group}
-                      sortMode={sortMode === SortMode.None ? 'None' : 'SiteSort'}
-                      currentSortingGroupId={currentSortingGroupId}
-                      onUpdate={handleSiteUpdate}
-                      onDelete={handleSiteDelete}
-                      onSaveSiteOrder={handleSaveSiteOrder}
-                      onStartSiteSort={startSiteSort}
-                      onAddSite={handleOpenAddSite}
-                      onUpdateGroup={handleGroupUpdate}
-                      onDeleteGroup={handleGroupDelete}
-                      configs={configs}
-                      darkMode={darkMode}
-                    />
-                  ))}
+                  {/* 搜索结果提示 */}
+                  {(searchQuery || selectedGroupFilter !== null) && (
+                    <Paper
+                      sx={{
+                        p: 2,
+                        backgroundColor: configs['site.backgroundImage']
+                          ? 'rgba(255, 255, 255, 0.1)'
+                          : 'background.paper',
+                        backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                        border: configs['site.backgroundImage']
+                          ? '1px solid rgba(255, 255, 255, 0.2)'
+                          : undefined,
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        {searchQuery && selectedGroupFilter !== null
+                          ? `在分组 "${groups.find(g => g.id === selectedGroupFilter)?.name}" 中搜索 "${searchQuery}" 的结果：`
+                          : searchQuery
+                          ? `搜索 "${searchQuery}" 的结果：`
+                          : `显示分组 "${groups.find(g => g.id === selectedGroupFilter)?.name}" 的内容：`
+                        }
+                        共找到 {getFilteredGroups.reduce((total, group) => total + group.sites.length, 0)} 个网站
+                      </Typography>
+                    </Paper>
+                  )}
+
+                  {getFilteredGroups.length === 0 ? (
+                    <Paper
+                      sx={{
+                        p: 4,
+                        textAlign: 'center',
+                        backgroundColor: configs['site.backgroundImage']
+                          ? 'rgba(255, 255, 255, 0.1)'
+                          : 'background.paper',
+                        backdropFilter: configs['site.backgroundImage'] ? 'blur(10px)' : 'none',
+                        border: configs['site.backgroundImage']
+                          ? '1px solid rgba(255, 255, 255, 0.2)'
+                          : undefined,
+                      }}
+                    >
+                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                        {searchQuery || selectedGroupFilter !== null ? '没有找到匹配的网站' : '暂无数据'}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {searchQuery || selectedGroupFilter !== null
+                          ? '尝试调整搜索条件或清除过滤器'
+                          : '点击"新增分组"开始添加您的第一个分组'
+                        }
+                      </Typography>
+                      {(searchQuery || selectedGroupFilter !== null) && (
+                        <Button
+                          variant="outlined"
+                          onClick={handleClearSearch}
+                          sx={{ mt: 2 }}
+                          startIcon={<ClearIcon />}
+                        >
+                          清除搜索
+                        </Button>
+                      )}
+                    </Paper>
+                  ) : (
+                    getFilteredGroups.map((group) => (
+                      <GroupCard
+                        key={`group-${group.id}`}
+                        group={group}
+                        sortMode={sortMode === SortMode.None ? 'None' : 'SiteSort'}
+                        currentSortingGroupId={currentSortingGroupId}
+                        onUpdate={handleSiteUpdate}
+                        onDelete={handleSiteDelete}
+                        onSaveSiteOrder={handleSaveSiteOrder}
+                        onStartSiteSort={startSiteSort}
+                        onAddSite={handleOpenAddSite}
+                        onUpdateGroup={handleGroupUpdate}
+                        onDeleteGroup={handleGroupDelete}
+                        configs={configs}
+                        darkMode={darkMode}
+                      />
+                    ))
+                  )}
                 </Stack>
               )}
             </Box>
